@@ -5,7 +5,13 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas import ActionResult, EntryPayload, PageResult
+from app.schemas import (
+    ActionResult,
+    BatchActionPayload,
+    BatchActionResult,
+    EntryPayload,
+    PageResult,
+)
 from app.services.outbound import OutboundService
 
 router = APIRouter(prefix="/api/outbound", tags=["出库管理"])
@@ -28,6 +34,21 @@ def list_entries(
         raise HTTPException(status_code=400, detail="每页最多 200 条，请缩小分页范围")
     items, total = service.list_entries(keyword=keyword, status=status, page=page, size=size)
     return PageResult(items=items, total=total, page=page, size=size)
+
+
+@router.post("/batch-actions", response_model=BatchActionResult)
+def run_batch_action(payload: BatchActionPayload) -> BatchActionResult:
+    """批量安排发运：先整组校验，任何一条不满足条件则整组不改动；全部通过后统一回写。"""
+    result = service.batch_run_action(payload.action, payload.ids)
+    return BatchActionResult(**result)
+
+
+# 注意：固定路径必须排在 /{entry_id} 之前，否则导出入口会被当成单号解析。
+@router.get("/export")
+def export_entries() -> dict[str, Any]:
+    """导出出库管理清单：与列表、详情读取同一份数据，状态口径完全一致。"""
+    items, total = service.list_entries(page=1, size=10000)
+    return {"module": "outbound", "total": total, "items": items}
 
 
 @router.get("/{entry_id}", response_model=dict)
@@ -56,10 +77,3 @@ def run_action(entry_id: int, payload: EntryPayload) -> ActionResult:
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)
-
-
-@router.get("/export")
-def export_entries() -> dict[str, Any]:
-    """导出出库管理清单：返回当前过滤条件下的全量数据。"""
-    items, total = service.list_entries(page=1, size=10000)
-    return {"module": "outbound", "total": total, "items": items}

@@ -28,6 +28,34 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class BatchItemResult(BaseModel):
+    """批量动作中一张单据的逐条结论：成功/失败必须与最终状态一一对应。"""
+
+    id: int
+    code: str | None = None
+    ok: bool
+    message: str
+
+
+class BatchActionResult(BaseModel):
+    """批量动作的整组结论：列表页、详情页、导出入口都以这份结论为准。"""
+
+    ok: bool
+    message: str
+    action: str | None = None
+    total: int = 0
+    success_count: int = 0
+    failure_count: int = 0
+    items: list[BatchItemResult] = Field(default_factory=list)
+
+
+class BatchActionPayload(BaseModel):
+    """批量动作入参：动作名称与勾选的单据标识集合。"""
+
+    action: str
+    ids: list[Any] = Field(default_factory=list)
+
+
 
 class OrderEntry(BaseModel):
     """冷链订单明细结构。"""
