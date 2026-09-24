@@ -28,6 +28,38 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class BatchActionResultItem(BaseModel):
+    """批量动作中单条记录的处理结论，按业务 ID 返回，避免前端按下标错位。"""
+
+    id: int
+    code: str | None = None
+    ok: bool
+    message: str
+    entry: dict[str, Any] | None = None
+
+
+class BatchActionResult(BaseModel):
+    """批量动作汇总：列表、详情和导出都以其中回写后的记录为准重新拉取。"""
+
+    ok: bool
+    action: str
+    total: int = 0
+    success_count: int = 0
+    failure_count: int = 0
+    message: str
+    results: list[BatchActionResultItem] = Field(default_factory=list)
+
+
+class OutboundActionPayload(BaseModel):
+    """出库单单条或批量动作参数。"""
+
+    action: str | None = None
+    ids: list[int] | None = None
+    entry_ids: list[int] | None = None
+    values: dict[str, Any] = Field(default_factory=dict)
+    remark: str | None = None
+
+
 
 class OrderEntry(BaseModel):
     """冷链订单明细结构。"""

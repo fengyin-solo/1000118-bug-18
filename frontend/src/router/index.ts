@@ -10,6 +10,7 @@ const Excursion = () => import('@/views/excursion/index.vue')
 const Warehouse = () => import('@/views/warehouse/index.vue')
 const Inbound = () => import('@/views/inbound/index.vue')
 const Outbound = () => import('@/views/outbound/index.vue')
+const OutboundDetail = () => import('@/views/outbound/detail.vue')
 const Inventory = () => import('@/views/inventory/index.vue')
 const Trace = () => import('@/views/trace/index.vue')
 const Quality = () => import('@/views/quality/index.vue')
@@ -36,6 +37,7 @@ const router = createRouter({
     { path: '/warehouse', name: 'warehouse', component: Warehouse },
     { path: '/inbound', name: 'inbound', component: Inbound },
     { path: '/outbound', name: 'outbound', component: Outbound },
+    { path: '/outbound/:id(\\d+)', name: 'outbound-detail', component: OutboundDetail },
     { path: '/inventory', name: 'inventory', component: Inventory },
     { path: '/trace', name: 'trace', component: Trace },
     { path: '/quality', name: 'quality', component: Quality },
